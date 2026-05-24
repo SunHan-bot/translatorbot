@@ -67,4 +67,6 @@ async def on_message(message):
             await message.channel.send("Chyba: " + str(chyba))
 
 # sem vlož svůj token
-client.run("MTUwODA3OTEyODQxNzUzNDA1Mg.GAY00v.jVAwj_0-zrz4cGED3KJso4q4vFGBwkCE88Ee80")
+import os
+
+client.run(os.getenv("DISCORD_TOKEN"))
