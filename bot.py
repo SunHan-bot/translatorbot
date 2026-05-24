@@ -1,5 +1,6 @@
 import discord
 import requests
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -13,10 +14,10 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    # pokud zpráva začíná /translate
-    if message.content.startswith("/translate"):
+    # reaguje na /translate i /traductor
+    if message.content.startswith("/translate") or message.content.startswith("/traductor"):
 
-        # rozdělí zprávu na části
+        # rozdělí zprávu
         casti = message.content.split(" ", 2)
 
         # kontrola správného použití
@@ -25,15 +26,23 @@ async def on_message(message):
                 "Použití:\n"
                 "/translate en text\n"
                 "/translate es text\n"
-                "/translate cs text"
+                "/translate cs text\n\n"
+                "nebo\n\n"
+                "/traductor en text\n"
+                "/traductor es text\n"
+                "/traductor cs text"
             )
             return
+
+        # příkaz (/translate nebo /traductor)
+        prikaz = casti[0]
 
         # cílový jazyk
         cilovy_jazyk = casti[1]
 
         # text k překladu
-        text = casti[2]
+        text = message.content.replace(prikaz, "", 1).strip()
+        text = text.split(" ", 1)[1]
 
         # povolené jazyky
         if cilovy_jazyk not in ["en", "es", "cs"]:
@@ -42,7 +51,7 @@ async def on_message(message):
 
         try:
 
-            # požadavek na Google překladač
+            # Google překladač
             odpoved = requests.post(
                 "https://translate.googleapis.com/translate_a/single",
                 params={
@@ -54,19 +63,17 @@ async def on_message(message):
                 }
             )
 
-            # odpověď
+            # data z odpovědi
             data = odpoved.json()
 
             # překlad
             vysledek = data[0][0][0]
 
-            # pošle překlad
+            # odešle překlad
             await message.channel.send(vysledek)
 
         except Exception as chyba:
             await message.channel.send("Chyba: " + str(chyba))
 
-# sem vlož svůj token
-import os
-
+# token z HeavenCloud / Railway / systému
 client.run(os.getenv("DISCORD_TOKEN"))
